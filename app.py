@@ -44,7 +44,7 @@ def save(data):
     with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=2)
 
-# ── ping endpoint (geen auth nodig — Pi's sturen hierheen) ───────────────────
+# ── ping endpoint ─────────────────────────────────────────────────────────────
 
 @app.route("/api/ping", methods=["POST"])
 def ping():
@@ -74,7 +74,22 @@ def ping():
     save(clients)
     return jsonify({"ok": True})
 
-# ── dashboard (wel auth) ──────────────────────────────────────────────────────
+# ── publieke status pagina (geen auth) ───────────────────────────────────────
+
+@app.route("/status/<client_id>")
+def public_status(client_id):
+    return render_template("status.html")
+
+@app.route("/api/status/<client_id>")
+def api_public_status(client_id):
+    clients = load()
+    c = clients.get(client_id)
+    if not c:
+        return jsonify({"error": "not found"}), 404
+    c["online"] = (time.time() - c.get("last_ts", 0)) < 360
+    return jsonify(c)
+
+# ── beheerder dashboard (wel auth) ───────────────────────────────────────────
 
 @app.route("/")
 @require_auth
