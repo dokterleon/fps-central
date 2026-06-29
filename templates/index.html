@@ -198,6 +198,7 @@ async function load(){
           <div>
             <div class="cc-name">${c.name||c.client_id}</div>
             <div class="cc-loc">📍 ${c.location||'—'}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px;font-family:monospace">${c.client_id}</div>
           </div>
           <div class="cc-status">
             <span class="dot ${c.online?'dot-g dot-pulse':'dot-r'}"></span>
