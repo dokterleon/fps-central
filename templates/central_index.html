@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FPS — Centrale beheer</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#09090c;--s1:#111318;--s2:#181b22;--s3:#1f2330;
+  --b:rgba(255,255,255,.07);--b2:rgba(255,255,255,.13);
+  --t:#f0f0ee;--muted:#6b7280;--sub:#9ca3af;
+  --y:#FFE000;--yb:rgba(255,224,0,.11);
+  --green:#22c55e;--gb:rgba(34,197,94,.13);
+  --red:#ef4444;--rb:rgba(239,68,68,.13);
+  --orange:#f59e0b;--ob:rgba(245,158,11,.13);
+  --r:10px;
+}
+body{background:var(--bg);color:var(--t);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:14px;min-height:100vh}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:58px;background:var(--s1);border-bottom:1px solid var(--b);position:sticky;top:0;z-index:10}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-bolt{width:34px;height:34px;border-radius:9px;background:var(--y);display:flex;align-items:center;justify-content:center;font-size:19px}
+.logo-name{font-size:15px;font-weight:700}
+.logo-sub{font-size:10px;color:var(--muted)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.chip{padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600}
+.cg{background:var(--gb);color:var(--green)}
+.cy{background:var(--yb);color:var(--y)}
+.cr{background:var(--rb);color:var(--red)}
+
+.page{max-width:1100px;margin:0 auto;padding:24px 20px 48px}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;margin-bottom:12px}
+
+/* summary stats */
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+.sum-card{background:var(--s2);border:1px solid var(--b);border-radius:var(--r);padding:14px 16px;text-align:center}
+.sum-num{font-size:28px;font-weight:700;color:var(--y)}
+.sum-label{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* client cards */
+.client-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.client-card{background:var(--s2);border:1px solid var(--b);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.client-card.online{border-color:rgba(34,197,94,.2)}
+.client-card.offline{opacity:.6}
+.client-card.has-error{border-color:rgba(239,68,68,.3)}
+
+.cc-header{display:flex;align-items:center;gap:10px}
+.cc-icon{width:38px;height:38px;border-radius:10px;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:1px solid var(--b)}
+.cc-name{font-size:14px;font-weight:700;color:var(--t)}
+.cc-loc{font-size:11px;color:var(--muted);margin-top:2px}
+.cc-status{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%}
+.dot-g{background:var(--green)}.dot-r{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.dot-pulse{animation:pulse 2s infinite}
+
+.cc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cc-stat{background:var(--s1);border-radius:8px;padding:8px 10px}
+.cc-stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.cc-stat-val{font-size:13px;font-weight:600;color:var(--t)}
+.cc-stat-val.vy{color:var(--y)}
+.cc-stat-val.vr{color:var(--red)}
+.cc-stat-val.vo{color:var(--orange)}
+
+.cc-printers{display:flex;flex-direction:column;gap:6px}
+.printer-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--s1);border-radius:8px;font-size:12px}
+.printer-name{flex:1;font-weight:500}
+.printer-state{font-size:11px;color:var(--muted)}
+.printer-remaining{font-size:11px;color:var(--y);font-weight:600;margin-left:auto}
+
+.cc-errors{background:var(--rb);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 12px}
+.cc-error-item{font-size:12px;color:var(--red);display:flex;align-items:center;gap:6px}
+
+.cc-footer{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted)}
+.version-badge{padding:3px 8px;border-radius:999px;font-size:10px;font-weight:600}
+.vb-ok{background:var(--gb);color:var(--green)}
+.vb-old{background:var(--ob);color:var(--orange)}
+
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-icon{font-size:48px;margin-bottom:12px}
+.empty-text{font-size:15px;margin-bottom:8px;color:var(--sub)}
+.empty-sub{font-size:13px}
+
+@media(max-width:640px){
+  .summary{grid-template-columns:1fr 1fr}
+  .client-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-bolt">⚡</div>
+    <div>
+      <div class="logo-name">Flitshokje</div>
+      <div class="logo-sub">Centrale beheer</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span class="chip" id="chip-online">● 0 online</span>
+    <span class="chip cy" id="chip-total">0 apparaten</span>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="section-title">Overzicht</div>
+  <div class="summary">
+    <div class="sum-card"><div class="sum-num" id="sum-online">0</div><div class="sum-label">Online</div></div>
+    <div class="sum-card"><div class="sum-num" id="sum-offline">0</div><div class="sum-label">Offline</div></div>
+    <div class="sum-card"><div class="sum-num" id="sum-errors">0</div><div class="sum-label">Fouten</div></div>
+    <div class="sum-card"><div class="sum-num" id="sum-updates">0</div><div class="sum-label">Update beschikbaar</div></div>
+  </div>
+
+  <div class="section-title">Apparaten</div>
+  <div class="client-grid" id="client-grid">
+    <div class="empty">
+      <div class="empty-icon">🖨</div>
+      <div class="empty-text">Laden...</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const LATEST_VERSION = "2.2.0";
+
+function timeAgo(ts){
+  if(!ts) return '—';
+  const diff = Math.floor(Date.now()/1000 - ts);
+  if(diff < 60)  return `${diff}s geleden`;
+  if(diff < 3600) return `${Math.floor(diff/60)}m geleden`;
+  if(diff < 86400) return `${Math.floor(diff/3600)}u geleden`;
+  return `${Math.floor(diff/86400)}d geleden`;
+}
+
+function tempColor(t){
+  if(t==null) return '';
+  if(t>=75) return 'vr';
+  if(t>=60) return 'vo';
+  return '';
+}
+
+async function load(){
+  try{
+    const clients = await fetch('/api/clients').then(r=>r.json());
+
+    const online  = clients.filter(c=>c.online).length;
+    const offline = clients.filter(c=>!c.online).length;
+    const errors  = clients.filter(c=>c.errors&&c.errors.length).length;
+    const updates = clients.filter(c=>c.version && c.version !== LATEST_VERSION).length;
+
+    document.getElementById('sum-online').textContent  = online;
+    document.getElementById('sum-offline').textContent = offline;
+    document.getElementById('sum-errors').textContent  = errors;
+    document.getElementById('sum-updates').textContent = updates;
+
+    const chipOnline = document.getElementById('chip-online');
+    chipOnline.className = 'chip '+(online>0?'cg':'cr');
+    chipOnline.textContent = `● ${online} online`;
+    document.getElementById('chip-total').textContent = `${clients.length} apparaten`;
+
+    const grid = document.getElementById('client-grid');
+    if(!clients.length){
+      grid.innerHTML=`
+        <div class="empty" style="grid-column:1/-1">
+          <div class="empty-icon">📡</div>
+          <div class="empty-text">Geen apparaten verbonden</div>
+          <div class="empty-sub">Pi's verschijnen hier zodra ze een ping sturen</div>
+        </div>`;
+      return;
+    }
+
+    grid.innerHTML = clients.map(c => {
+      const hasError = c.errors && c.errors.length > 0;
+      const cardClass = !c.online ? 'offline' : hasError ? 'has-error' : 'online';
+      const versionOk = c.version === LATEST_VERSION;
+
+      const printerRows = (c.printers||[]).map(p=>`
+        <div class="printer-row">
+          <span>🖨</span>
+          <span class="printer-name">${p.name||p.printer||'—'}</span>
+          <span class="printer-state">${p.state||'—'}</span>
+          <span class="printer-remaining">${p.remaining||'—'}</span>
+        </div>`).join('');
+
+      const errorBlock = hasError ? `
+        <div class="cc-errors">
+          ${c.errors.map(e=>`<div class="cc-error-item">⚠ ${e}</div>`).join('')}
+        </div>` : '';
+
+      return `
+      <div class="client-card ${cardClass}">
+        <div class="cc-header">
+          <div class="cc-icon">${c.online?'🟢':'🔴'}</div>
+          <div>
+            <div class="cc-name">${c.name||c.client_id}</div>
+            <div class="cc-loc">📍 ${c.location||'—'}</div>
+          </div>
+          <div class="cc-status">
+            <span class="dot ${c.online?'dot-g dot-pulse':'dot-r'}"></span>
+            ${c.online?'Online':'Offline'}
+          </div>
+        </div>
+
+        <div class="cc-stats">
+          <div class="cc-stat">
+            <div class="cc-stat-label">IP</div>
+            <div class="cc-stat-val" style="font-size:11px">${c.ip||'—'}</div>
+          </div>
+          <div class="cc-stat">
+            <div class="cc-stat-label">CPU temp</div>
+            <div class="cc-stat-val ${tempColor(c.temp)}">${c.temp!=null?c.temp+'°C':'—'}</div>
+          </div>
+          <div class="cc-stat">
+            <div class="cc-stat-label">Uptime</div>
+            <div class="cc-stat-val">${c.uptime||'—'}</div>
+          </div>
+        </div>
+
+        ${printerRows ? `<div class="cc-printers">${printerRows}</div>` : ''}
+        ${errorBlock}
+
+        <div class="cc-footer">
+          <span>🕐 ${c.last_seen||'—'}</span>
+          <span class="version-badge ${versionOk?'vb-ok':'vb-old'}">v${c.version||'?'}${!versionOk?' ⬆':''}</span>
+        </div>
+      </div>`;
+    }).join('');
+
+  }catch(e){
+    document.getElementById('client-grid').innerHTML=`
+      <div class="empty" style="grid-column:1/-1">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-text">Kan data niet laden</div>
+      </div>`;
+  }
+}
+
+load();
+setInterval(load, 15000);
+</script>
+</body>
+</html>
