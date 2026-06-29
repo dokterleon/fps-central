@@ -17,7 +17,6 @@
   --r:10px;
 }
 body{background:var(--bg);color:var(--t);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:14px;min-height:100vh}
-
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:58px;background:var(--s1);border-bottom:1px solid var(--b);position:sticky;top:0;z-index:10}
 .logo{display:flex;align-items:center;gap:12px}
 .logo-bolt{width:34px;height:34px;border-radius:9px;background:var(--y);display:flex;align-items:center;justify-content:center;font-size:19px}
@@ -28,33 +27,30 @@ body{background:var(--bg);color:var(--t);font-family:-apple-system,BlinkMacSyste
 .cg{background:var(--gb);color:var(--green)}
 .cy{background:var(--yb);color:var(--y)}
 .cr{background:var(--rb);color:var(--red)}
-
 .page{max-width:1100px;margin:0 auto;padding:24px 20px 48px}
 .section-title{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;margin-bottom:12px}
-
-/* summary stats */
-.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
 .sum-card{background:var(--s2);border:1px solid var(--b);border-radius:var(--r);padding:14px 16px;text-align:center}
 .sum-num{font-size:28px;font-weight:700;color:var(--y)}
 .sum-label{font-size:11px;color:var(--muted);margin-top:4px}
-
-/* client cards */
+.search-wrap{margin-bottom:16px}
+.search-input{width:100%;padding:11px 16px;background:var(--s2);border:1px solid var(--b2);border-radius:10px;color:var(--t);font-size:14px;outline:none;transition:border-color .15s}
+.search-input:focus{border-color:rgba(255,224,0,.4)}
 .client-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
 .client-card{background:var(--s2);border:1px solid var(--b);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px}
 .client-card.online{border-color:rgba(34,197,94,.2)}
 .client-card.offline{opacity:.6}
 .client-card.has-error{border-color:rgba(239,68,68,.3)}
-
 .cc-header{display:flex;align-items:center;gap:10px}
 .cc-icon{width:38px;height:38px;border-radius:10px;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:1px solid var(--b)}
 .cc-name{font-size:14px;font-weight:700;color:var(--t)}
 .cc-loc{font-size:11px;color:var(--muted);margin-top:2px}
+.cc-id{font-size:10px;color:var(--muted);font-family:monospace;margin-top:2px}
 .cc-status{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;white-space:nowrap}
 .dot{width:7px;height:7px;border-radius:50%}
 .dot-g{background:var(--green)}.dot-r{background:var(--red)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .dot-pulse{animation:pulse 2s infinite}
-
 .cc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .cc-stat{background:var(--s1);border-radius:8px;padding:8px 10px}
 .cc-stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
@@ -62,26 +58,20 @@ body{background:var(--bg);color:var(--t);font-family:-apple-system,BlinkMacSyste
 .cc-stat-val.vy{color:var(--y)}
 .cc-stat-val.vr{color:var(--red)}
 .cc-stat-val.vo{color:var(--orange)}
-
 .cc-printers{display:flex;flex-direction:column;gap:6px}
 .printer-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--s1);border-radius:8px;font-size:12px}
 .printer-name{flex:1;font-weight:500}
 .printer-state{font-size:11px;color:var(--muted)}
 .printer-remaining{font-size:11px;color:var(--y);font-weight:600;margin-left:auto}
-
 .cc-errors{background:var(--rb);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 12px}
 .cc-error-item{font-size:12px;color:var(--red);display:flex;align-items:center;gap:6px}
-
 .cc-footer{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted)}
 .version-badge{padding:3px 8px;border-radius:999px;font-size:10px;font-weight:600}
 .vb-ok{background:var(--gb);color:var(--green)}
 .vb-old{background:var(--ob);color:var(--orange)}
-
-.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty{text-align:center;padding:60px 20px;color:var(--muted);grid-column:1/-1}
 .empty-icon{font-size:48px;margin-bottom:12px}
 .empty-text{font-size:15px;margin-bottom:8px;color:var(--sub)}
-.empty-sub{font-size:13px}
-
 @media(max-width:640px){
   .summary{grid-template-columns:1fr 1fr}
   .client-grid{grid-template-columns:1fr}
@@ -114,18 +104,20 @@ body{background:var(--bg);color:var(--t);font-family:-apple-system,BlinkMacSyste
     <div class="sum-card"><div class="sum-num" id="sum-updates">0</div><div class="sum-label">Update beschikbaar</div></div>
   </div>
 
+  <div class="search-wrap">
+    <input class="search-input" type="text" id="search" placeholder="🔍 Zoek op naam, locatie of ID..." oninput="filterClients()">
+  </div>
+
   <div class="section-title">Apparaten</div>
   <div class="client-grid" id="client-grid">
-    <div class="empty">
-      <div class="empty-icon">🖨</div>
-      <div class="empty-text">Laden...</div>
-    </div>
+    <div class="empty"><div class="empty-icon">⏳</div><div class="empty-text">Laden...</div></div>
   </div>
 
 </div>
 
 <script>
 const LATEST_VERSION = "2.2.0";
+let allClients = [];
 
 function timeAgo(ts){
   if(!ts) return '—';
@@ -143,100 +135,106 @@ function tempColor(t){
   return '';
 }
 
+function renderClients(clients){
+  const grid = document.getElementById('client-grid');
+
+  // summary op basis van ALLE clients
+  const online  = allClients.filter(c=>c.online).length;
+  const offline = allClients.filter(c=>!c.online).length;
+  const errors  = allClients.filter(c=>c.errors&&c.errors.length).length;
+  const updates = allClients.filter(c=>c.version && c.version !== LATEST_VERSION).length;
+  document.getElementById('sum-online').textContent  = online;
+  document.getElementById('sum-offline').textContent = offline;
+  document.getElementById('sum-errors').textContent  = errors;
+  document.getElementById('sum-updates').textContent = updates;
+  const co = document.getElementById('chip-online');
+  co.className='chip '+(online>0?'cg':'cr');
+  co.textContent=`● ${online} online`;
+  document.getElementById('chip-total').textContent=`${allClients.length} apparaten`;
+
+  if(!clients.length){
+    grid.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Geen resultaten gevonden</div></div>';
+    return;
+  }
+
+  grid.innerHTML = clients.map(c => {
+    const hasError = c.errors && c.errors.length > 0;
+    const cardClass = !c.online ? 'offline' : hasError ? 'has-error' : 'online';
+    const versionOk = c.version === LATEST_VERSION;
+
+    const printerRows = (c.printers||[]).map(p=>`
+      <div class="printer-row">
+        <span>🖨</span>
+        <span class="printer-name">${p.printer||'—'}</span>
+        <span class="printer-state">${p.state||'—'}</span>
+        <span class="printer-remaining">${p.remaining||'—'}</span>
+      </div>`).join('');
+
+    const errorBlock = hasError ? `
+      <div class="cc-errors">
+        ${c.errors.map(e=>`<div class="cc-error-item">⚠ ${e}</div>`).join('')}
+      </div>` : '';
+
+    return `
+    <div class="client-card ${cardClass}">
+      <div class="cc-header">
+        <div class="cc-icon">${c.online?'🟢':'🔴'}</div>
+        <div>
+          <div class="cc-name">${c.name||c.client_id}</div>
+          <div class="cc-loc">📍 ${c.location||'—'}</div>
+          <div class="cc-id">${c.client_id}</div>
+        </div>
+        <div class="cc-status">
+          <span class="dot ${c.online?'dot-g dot-pulse':'dot-r'}"></span>
+          ${c.online?'Online':'Offline'}
+        </div>
+      </div>
+
+      <div class="cc-stats">
+        <div class="cc-stat">
+          <div class="cc-stat-label">IP</div>
+          <div class="cc-stat-val" style="font-size:11px">${c.ip||'—'}</div>
+        </div>
+        <div class="cc-stat">
+          <div class="cc-stat-label">CPU temp</div>
+          <div class="cc-stat-val ${tempColor(c.temp)}">${c.temp!=null?c.temp+'°C':'—'}</div>
+        </div>
+        <div class="cc-stat">
+          <div class="cc-stat-label">Uptime</div>
+          <div class="cc-stat-val">${c.uptime||'—'}</div>
+        </div>
+      </div>
+
+      ${printerRows ? `<div class="cc-printers">${printerRows}</div>` : ''}
+      ${errorBlock}
+
+      <div class="cc-footer">
+        <span>🕐 ${c.last_seen||'—'}</span>
+        <span class="version-badge ${versionOk?'vb-ok':'vb-old'}">v${c.version||'?'}${!versionOk?' ⬆':''}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterClients(){
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  if(!q) return renderClients(allClients);
+  const filtered = allClients.filter(c =>
+    (c.name||'').toLowerCase().includes(q) ||
+    (c.location||'').toLowerCase().includes(q) ||
+    (c.client_id||'').toLowerCase().includes(q) ||
+    (c.ip||'').includes(q)
+  );
+  renderClients(filtered);
+}
+
 async function load(){
   try{
-    const clients = await fetch('/api/clients').then(r=>r.json());
-
-    const online  = clients.filter(c=>c.online).length;
-    const offline = clients.filter(c=>!c.online).length;
-    const errors  = clients.filter(c=>c.errors&&c.errors.length).length;
-    const updates = clients.filter(c=>c.version && c.version !== LATEST_VERSION).length;
-
-    document.getElementById('sum-online').textContent  = online;
-    document.getElementById('sum-offline').textContent = offline;
-    document.getElementById('sum-errors').textContent  = errors;
-    document.getElementById('sum-updates').textContent = updates;
-
-    const chipOnline = document.getElementById('chip-online');
-    chipOnline.className = 'chip '+(online>0?'cg':'cr');
-    chipOnline.textContent = `● ${online} online`;
-    document.getElementById('chip-total').textContent = `${clients.length} apparaten`;
-
-    const grid = document.getElementById('client-grid');
-    if(!clients.length){
-      grid.innerHTML=`
-        <div class="empty" style="grid-column:1/-1">
-          <div class="empty-icon">📡</div>
-          <div class="empty-text">Geen apparaten verbonden</div>
-          <div class="empty-sub">Pi's verschijnen hier zodra ze een ping sturen</div>
-        </div>`;
-      return;
-    }
-
-    grid.innerHTML = clients.map(c => {
-      const hasError = c.errors && c.errors.length > 0;
-      const cardClass = !c.online ? 'offline' : hasError ? 'has-error' : 'online';
-      const versionOk = c.version === LATEST_VERSION;
-
-      const printerRows = (c.printers||[]).map(p=>`
-        <div class="printer-row">
-          <span>🖨</span>
-          <span class="printer-name">${p.name||p.printer||'—'}</span>
-          <span class="printer-state">${p.state||'—'}</span>
-          <span class="printer-remaining">${p.remaining||'—'}</span>
-        </div>`).join('');
-
-      const errorBlock = hasError ? `
-        <div class="cc-errors">
-          ${c.errors.map(e=>`<div class="cc-error-item">⚠ ${e}</div>`).join('')}
-        </div>` : '';
-
-      return `
-      <div class="client-card ${cardClass}">
-        <div class="cc-header">
-          <div class="cc-icon">${c.online?'🟢':'🔴'}</div>
-          <div>
-            <div class="cc-name">${c.name||c.client_id}</div>
-            <div class="cc-loc">📍 ${c.location||'—'}</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:2px;font-family:monospace">${c.client_id}</div>
-          </div>
-          <div class="cc-status">
-            <span class="dot ${c.online?'dot-g dot-pulse':'dot-r'}"></span>
-            ${c.online?'Online':'Offline'}
-          </div>
-        </div>
-
-        <div class="cc-stats">
-          <div class="cc-stat">
-            <div class="cc-stat-label">IP</div>
-            <div class="cc-stat-val" style="font-size:11px">${c.ip||'—'}</div>
-          </div>
-          <div class="cc-stat">
-            <div class="cc-stat-label">CPU temp</div>
-            <div class="cc-stat-val ${tempColor(c.temp)}">${c.temp!=null?c.temp+'°C':'—'}</div>
-          </div>
-          <div class="cc-stat">
-            <div class="cc-stat-label">Uptime</div>
-            <div class="cc-stat-val">${c.uptime||'—'}</div>
-          </div>
-        </div>
-
-        ${printerRows ? `<div class="cc-printers">${printerRows}</div>` : ''}
-        ${errorBlock}
-
-        <div class="cc-footer">
-          <span>🕐 ${c.last_seen||'—'}</span>
-          <span class="version-badge ${versionOk?'vb-ok':'vb-old'}">v${c.version||'?'}${!versionOk?' ⬆':''}</span>
-        </div>
-      </div>`;
-    }).join('');
-
+    const now = Date.now()/1000;
+    allClients = await fetch('/api/clients').then(r=>r.json());
+    filterClients();
   }catch(e){
-    document.getElementById('client-grid').innerHTML=`
-      <div class="empty" style="grid-column:1/-1">
-        <div class="empty-icon">⚠️</div>
-        <div class="empty-text">Kan data niet laden</div>
-      </div>`;
+    document.getElementById('client-grid').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">Kan data niet laden</div></div>';
   }
 }
 
