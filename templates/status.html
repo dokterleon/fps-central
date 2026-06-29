@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FPS Print Status</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#09090c;--s1:#111318;--s2:#181b22;
+  --b:rgba(255,255,255,.07);--b2:rgba(255,255,255,.13);
+  --t:#f0f0ee;--muted:#6b7280;--sub:#9ca3af;
+  --y:#FFE000;--yb:rgba(255,224,0,.11);
+  --green:#22c55e;--gb:rgba(34,197,94,.13);
+  --red:#ef4444;--rb:rgba(239,68,68,.13);
+  --orange:#f59e0b;--ob:rgba(245,158,11,.13);
+  --r:12px;
+}
+body{background:var(--bg);color:var(--t);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:14px;min-height:100vh;display:flex;flex-direction:column}
+
+.header{background:var(--s1);border-bottom:1px solid var(--b);padding:16px 20px;display:flex;align-items:center;gap:12px}
+.logo-bolt{width:32px;height:32px;border-radius:8px;background:var(--y);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.logo-name{font-size:15px;font-weight:700}
+.logo-sub{font-size:11px;color:var(--muted)}
+
+.page{max-width:480px;margin:0 auto;padding:24px 16px;width:100%;flex:1}
+
+.status-card{background:var(--s2);border:1px solid var(--b);border-radius:16px;padding:24px;margin-bottom:16px;text-align:center}
+.status-icon{font-size:52px;margin-bottom:12px}
+.status-name{font-size:20px;font-weight:700;margin-bottom:4px}
+.status-loc{font-size:13px;color:var(--muted);margin-bottom:16px}
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;margin-bottom:0}
+.badge-online{background:var(--gb);color:var(--green)}
+.badge-offline{background:var(--rb);color:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-g{background:var(--green);animation:pulse 2s infinite}
+.dot-r{background:var(--red)}
+
+.printer-card{background:var(--s2);border:1px solid var(--b);border-radius:var(--r);padding:18px;margin-bottom:12px}
+.printer-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.printer-name{font-size:15px;font-weight:600}
+.printer-state{font-size:12px;font-weight:600}
+.state-ready{color:var(--green)}
+.state-printing{color:var(--y)}
+.state-error{color:var(--red)}
+
+.remaining-wrap{text-align:center;padding:16px 0;border-top:1px solid var(--b);border-bottom:1px solid var(--b);margin:14px 0}
+.remaining-num{font-size:48px;font-weight:700;color:var(--y);line-height:1}
+.remaining-label{font-size:12px;color:var(--muted);margin-top:6px}
+
+.ribbon-bar{height:8px;background:var(--b2);border-radius:4px;overflow:hidden;margin-top:14px}
+.ribbon-fill{height:100%;border-radius:4px;background:var(--green);transition:width .5s}
+
+.mode-badge{display:inline-block;padding:4px 10px;background:var(--yb);color:var(--y);border-radius:999px;font-size:11px;font-weight:600;margin-top:10px}
+
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.info-card{background:var(--s2);border:1px solid var(--b);border-radius:var(--r);padding:14px;text-align:center}
+.info-val{font-size:18px;font-weight:700;color:var(--t)}
+.info-label{font-size:11px;color:var(--muted);margin-top:4px}
+
+.error-card{background:var(--rb);border:1px solid rgba(239,68,68,.2);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;font-size:13px;color:var(--red)}
+
+.footer{text-align:center;padding:16px;font-size:11px;color:var(--muted)}
+.last-update{font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
+
+.offline-card{background:var(--rb);border:1px solid rgba(239,68,68,.2);border-radius:16px;padding:32px;text-align:center;margin-bottom:16px}
+.offline-icon{font-size:48px;margin-bottom:12px}
+.offline-text{font-size:16px;font-weight:600;color:var(--red);margin-bottom:8px}
+.offline-sub{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-bolt">⚡</div>
+  <div>
+    <div class="logo-name">Flitshokje Print Server</div>
+    <div class="logo-sub">Live status</div>
+  </div>
+</div>
+
+<div class="page">
+  <div id="content">
+    <div style="text-align:center;padding:60px 20px;color:var(--muted)">⏳ Laden...</div>
+  </div>
+  <div class="last-update" id="last-update"></div>
+</div>
+
+<div class="footer">Flitshokje Print Server · FPS</div>
+
+<script>
+const CLIENT_ID = window.location.pathname.split('/').pop();
+
+function stateClass(s){
+  if(!s) return 'state-ready';
+  if(s.toLowerCase().includes('print')) return 'state-printing';
+  if(s.toLowerCase().includes('error')||s.toLowerCase().includes('paus')) return 'state-error';
+  return 'state-ready';
+}
+
+function stateLabel(s){
+  if(!s) return 'Gereed';
+  if(s.toLowerCase().includes('print')) return '⚡ Printing';
+  if(s.toLowerCase().includes('error')||s.toLowerCase().includes('paus')) return '✕ Fout';
+  return '● Gereed';
+}
+
+async function load(){
+  try{
+    const d = await fetch(`/api/status/${CLIENT_ID}`).then(r=>r.json());
+    const el = document.getElementById('content');
+
+    if(!d || d.error){
+      el.innerHTML=`<div class="offline-card"><div class="offline-icon">❓</div><div class="offline-text">Apparaat niet gevonden</div><div class="offline-sub">Controleer het adres</div></div>`;
+      return;
+    }
+
+    if(!d.online){
+      el.innerHTML=`
+        <div class="status-card">
+          <div class="status-icon">🔴</div>
+          <div class="status-name">${d.name||CLIENT_ID}</div>
+          <div class="status-loc">📍 ${d.location||'—'}</div>
+          <span class="status-badge badge-offline"><span class="dot dot-r"></span> Offline</span>
+        </div>
+        <div class="offline-card">
+          <div class="offline-icon">📡</div>
+          <div class="offline-text">Print server niet bereikbaar</div>
+          <div class="offline-sub">Laatste update: ${d.last_seen||'onbekend'}</div>
+        </div>`;
+      return;
+    }
+
+    const printers = d.printers || [];
+    const errors   = d.errors   || [];
+
+    const errorBlock = errors.length ? errors.map(e=>`<div class="error-card">⚠️ ${e}</div>`).join('') : '';
+
+    const printerBlocks = printers.map(p => {
+      const rem = parseInt(p.remaining) || 0;
+      const ribbonPct = d.marker_level || (rem > 0 ? Math.min(100, rem) : 0);
+      const ribbonColor = rem < 20 ? '#ef4444' : rem < 50 ? '#f59e0b' : '#22c55e';
+      return `
+      <div class="printer-card">
+        <div class="printer-header">
+          <div class="printer-name">🖨 ${p.printer||'Printer'}</div>
+          <div class="printer-state ${stateClass(p.state)}">${stateLabel(p.state)}</div>
+        </div>
+        <div class="remaining-wrap">
+          <div class="remaining-num">${p.remaining||'—'}</div>
+          <div class="remaining-label">prints resterend in de rol</div>
+        </div>
+        ${p.mode ? `<div style="text-align:center"><span class="mode-badge">${p.mode}</span></div>` : ''}
+        <div class="ribbon-bar"><div class="ribbon-fill" style="width:${ribbonPct}%;background:${ribbonColor}"></div></div>
+      </div>`;
+    }).join('');
+
+    el.innerHTML = `
+      <div class="status-card">
+        <div class="status-icon">🟢</div>
+        <div class="status-name">${d.name||CLIENT_ID}</div>
+        <div class="status-loc">📍 ${d.location||'—'}</div>
+        <span class="status-badge badge-online"><span class="dot dot-g"></span> Online</span>
+      </div>
+
+      ${errorBlock}
+      ${printerBlocks}
+
+      <div class="info-grid">
+        <div class="info-card"><div class="info-val">${d.temp!=null?d.temp+'°C':'—'}</div><div class="info-label">CPU temp</div></div>
+        <div class="info-card"><div class="info-val">${d.uptime||'—'}</div><div class="info-label">Uptime</div></div>
+      </div>`;
+
+    document.getElementById('last-update').textContent = `Bijgewerkt: ${new Date().toLocaleTimeString('nl-NL')}`;
+
+  }catch(e){
+    document.getElementById('content').innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">⚠️ Kan status niet laden</div>';
+  }
+}
+
+load();
+setInterval(load, 30000);
+</script>
+</body>
+</html>
