@@ -10,7 +10,7 @@
   --bg:#09090c;--s1:#111318;--s2:#181b22;--s3:#1f2330;
   --b:rgba(255,255,255,.07);--b2:rgba(255,255,255,.13);
   --t:#f0f0ee;--muted:#6b7280;--sub:#9ca3af;
-  --y:#FFE000;--yb:rgba(255,224,0,.11);
+  --y:#00AAFF;--yb:rgba(0,170,255,.11);
   --green:#22c55e;--gb:rgba(34,197,94,.13);
   --red:#ef4444;--rb:rgba(239,68,68,.13);
   --orange:#f59e0b;--ob:rgba(245,158,11,.13);
@@ -35,7 +35,7 @@ body{background:var(--bg);color:var(--t);font-family:-apple-system,BlinkMacSyste
 .sum-label{font-size:11px;color:var(--muted);margin-top:4px}
 .search-wrap{margin-bottom:16px}
 .search-input{width:100%;padding:11px 16px;background:var(--s2);border:1px solid var(--b2);border-radius:10px;color:var(--t);font-size:14px;outline:none;transition:border-color .15s}
-.search-input:focus{border-color:rgba(255,224,0,.4)}
+.search-input:focus{border-color:rgba(0,170,255,.4)}
 .client-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
 .client-card{background:var(--s2);border:1px solid var(--b);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px}
 .client-card.online{border-color:rgba(34,197,94,.2)}
@@ -82,11 +82,7 @@ body{background:var(--bg);color:var(--t);font-family:-apple-system,BlinkMacSyste
 
 <div class="topbar">
   <div class="logo">
-    <div class="logo-bolt">⚡</div>
-    <div>
-      <div class="logo-name">Flitshokje</div>
-      <div class="logo-sub">Centrale beheer</div>
-    </div>
+    <img src="/static/fps_logo_top.png" alt="FPS" style="height:46px;width:auto">
   </div>
   <div class="topbar-right">
     <span class="chip" id="chip-online">● 0 online</span>
