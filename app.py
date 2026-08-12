@@ -108,5 +108,91 @@ def api_clients():
     result.sort(key=lambda x: x.get("last_ts", 0), reverse=True)
     return jsonify(result)
 
+
+# ── licentie validatie ────────────────────────────────────────────────────────
+@app.route("/api/validate", methods=["POST"])
+def validate():
+    key = request.headers.get("X-API-Key", "")
+    if key != API_KEY:
+        return jsonify({"valid": False, "reason": "unauthorized"}), 401
+    d = request.json or {}
+    client_id = d.get("client_id")
+    hardware_id = d.get("hardware_id")
+    if not client_id or not hardware_id:
+        return jsonify({"valid": False, "reason": "missing fields"}), 400
+    clients = load()
+    c = clients.get(client_id)
+    # Onbekende client_id
+    if not c:
+        return jsonify({"valid": False, "reason": "unknown_client"}), 403
+    # Geblokkeerd
+    if c.get("blocked", False):
+        return jsonify({"valid": False, "reason": "blocked"}), 403
+    # Hardware check — clone detectie
+    registered_hw = c.get("hardware_id")
+    if registered_hw and registered_hw != hardware_id:
+        return jsonify({"valid": False, "reason": "hardware_mismatch"}), 403
+    # Eerste keer — hardware_id opslaan
+    if not registered_hw:
+        c["hardware_id"] = hardware_id
+    # Licentie verlopen
+    import time as _time
+    expires = c.get("expires_at")
+    if expires and _time.time() > expires:
+        return jsonify({"valid": False, "reason": "expired"}), 403
+    # Alles OK
+    c["hardware_id"] = hardware_id
+    c["last_validated"] = __import__('datetime').datetime.now().strftime("%d-%m %H:%M")
+    c["licensed"] = c.get("licensed", True)
+    clients[client_id] = c
+    save(clients)
+    return jsonify({
+        "valid": True,
+        "demo": c.get("demo", False),
+        "licensed": c.get("licensed", True),
+        "client_id": client_id
+    })
+
+# ── unit beheer (blokkeren/activeren) ────────────────────────────────────────
+@app.route("/api/unit/<client_id>/block", methods=["POST"])
+@require_auth
+def block_unit(client_id):
+    clients = load()
+    if client_id not in clients:
+        return jsonify({"error": "not found"}), 404
+    clients[client_id]["blocked"] = True
+    save(clients)
+    return jsonify({"ok": True, "blocked": True})
+
+@app.route("/api/unit/<client_id>/unblock", methods=["POST"])
+@require_auth
+def unblock_unit(client_id):
+    clients = load()
+    if client_id not in clients:
+        return jsonify({"error": "not found"}), 404
+    clients[client_id]["blocked"] = False
+    save(clients)
+    return jsonify({"ok": True, "blocked": False})
+
+@app.route("/api/unit/<client_id>/reset-hardware", methods=["POST"])
+@require_auth
+def reset_hardware(client_id):
+    clients = load()
+    if client_id not in clients:
+        return jsonify({"error": "not found"}), 404
+    clients[client_id]["hardware_id"] = None
+    save(clients)
+    return jsonify({"ok": True, "message": "hardware_id gewist"})
+
+@app.route("/api/unit/<client_id>/demo", methods=["POST"])
+@require_auth
+def set_demo(client_id):
+    clients = load()
+    if client_id not in clients:
+        return jsonify({"error": "not found"}), 404
+    clients[client_id]["demo"] = request.json.get("demo", True)
+    save(clients)
+    return jsonify({"ok": True})
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
