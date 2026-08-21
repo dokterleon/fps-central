@@ -72,6 +72,7 @@ body{background:var(--bg);color:var(--t);font-family:-apple-system,BlinkMacSyste
 .btn-unblock{background:var(--gb);color:var(--green)}.btn-unblock:hover{background:rgba(34,197,94,.3)}
 .btn-reset{background:var(--yb);color:var(--y)}.btn-reset:hover{background:rgba(0,170,255,.25)}
 .btn-delete{background:var(--rb);color:var(--red)}.btn-delete:hover{background:rgba(239,68,68,.3)}
+.blocked-badge{background:var(--rb);color:var(--red);padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;margin-left:8px}
 .btn-delete{background:var(--rb);color:var(--red);border:1px solid rgba(239,68,68,.3)}.btn-delete:hover{background:rgba(239,68,68,.3)}
 .version-badge{padding:3px 8px;border-radius:999px;font-size:10px;font-weight:600}
 .vb-ok{background:var(--gb);color:var(--green)}
@@ -183,7 +184,7 @@ function renderClients(clients){
       <div class="cc-header">
         <div class="cc-icon">${c.online?'🟢':'🔴'}</div>
         <div>
-          <div class="cc-name">${c.name||c.client_id}</div>
+          <div class="cc-name">${c.name||c.client_id}${c.blocked ? '<span class="blocked-badge">🔒 GEBLOKKEERD</span>' : ''}</div>
           <div class="cc-loc">📍 ${c.location||'—'}</div>
           <div class="cc-id">${c.client_id}</div>
         </div>
