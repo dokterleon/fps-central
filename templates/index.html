@@ -216,7 +216,6 @@ function renderClients(clients){
         <button class="btn-act btn-unblock" onclick="blockUnit('${c.client_id}', false)">✅ Activeer</button>
         <button class="btn-act btn-reset" onclick="resetHW('${c.client_id}')">🔄 Reset HW</button>
         <button class="btn-act btn-delete" onclick="deleteUnit('${c.client_id}')">🗑 Verwijder</button>
-        <button class="btn-act btn-delete" onclick="deleteUnit('${c.client_id}')">🗑 Verwijder</button>
       </div>
       <div class="cc-footer">
         <span>🕐 ${c.last_seen||'—'}</span>
