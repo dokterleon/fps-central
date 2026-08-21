@@ -194,5 +194,16 @@ def set_demo(client_id):
     save(clients)
     return jsonify({"ok": True})
 
+
+@app.route("/api/unit/<client_id>/delete", methods=["POST"])
+@require_auth
+def delete_unit(client_id):
+    clients = load()
+    if client_id not in clients:
+        return jsonify({"error": "not found"}), 404
+    del clients[client_id]
+    save(clients)
+    return jsonify({"ok": True, "deleted": client_id})
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
